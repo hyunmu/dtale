@@ -1,4 +1,6 @@
 import _ from "lodash";
+import $ from "jquery";
+import { logException } from "../fetcher";
 
 export function convertCellIdxToCoords(cellIdx) {
   return _.map(_.split(cellIdx, "|"), v => parseInt(v));
@@ -14,7 +16,16 @@ export function buildRanges(cell1, cell2) {
   return { colRange, rowRange };
 }
 
-export function isInRange(currCol, currRow, rangeSelect) {
+function baseIsInColRange(currCol, columnRange) {
+  const finalRange = [columnRange.start, columnRange.end];
+  finalRange.sort();
+  return currCol >= finalRange[0] && currCol <= finalRange[1];
+}
+
+export function isInRange(currCol, currRow, rangeSelect, columnRange) {
+  if (columnRange && columnRange.start && columnRange.end) {
+    return baseIsInColRange(currCol, columnRange);
+  }
   if (!rangeSelect || !rangeSelect.start || !rangeSelect.end) {
     return false;
   }
@@ -22,6 +33,13 @@ export function isInRange(currCol, currRow, rangeSelect) {
   const inCols = currCol >= colRange[0] && currCol <= colRange[1];
   const inRows = currRow >= rowRange[0] && currRow <= rowRange[1];
   return inCols && inRows;
+}
+
+export function isInColumnRange(currCol, columnRange) {
+  if (!columnRange || !columnRange.start || !columnRange.end) {
+    return false;
+  }
+  return baseIsInColRange(currCol, columnRange);
 }
 
 export function buildCopyText(data, columns, cell1, cell2) {
@@ -42,4 +60,15 @@ export function buildCopyText(data, columns, cell1, cell2) {
     currRow++;
   }
   return { text, headers };
+}
+
+export function buildColumnCopyText(dataId, columns, start, end, callback) {
+  const selectedColumns = _.filter(columns, c => (c.index >= start || c.index <= end) && c.visible);
+  const headers = _.map(selectedColumns, "name");
+  const postCallback = text => callback({ text, headers });
+  try {
+    $.post(`/dtale/build-column-copy/${dataId}`, { columns: JSON.stringify(headers) }, postCallback);
+  } catch (e) {
+    logException(e, e.stack);
+  }
 }

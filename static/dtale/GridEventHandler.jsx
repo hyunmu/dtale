@@ -28,11 +28,15 @@ class ReactGridEventHandler extends React.Component {
       if (rangeExists) {
         const cellIdx = _.get(e, "target.attributes.cell_idx.nodeValue");
         this.props.propagateState({
-          rangeSelect: { ...rangeSelect, end: cellIdx ?? null },
+          rangeSelect: {
+            ...rangeSelect,
+            end: cellIdx ?? null,
+            columnRange: null,
+          },
         });
       }
     } else if (rangeExists) {
-      this.props.propagateState({ rangeSelect: null });
+      this.props.propagateState({ rangeSelect: null, columnRange: null });
     }
   }
 
@@ -53,7 +57,10 @@ class ReactGridEventHandler extends React.Component {
             ...this.props,
           });
         } else {
-          this.props.propagateState({ rangeSelect: { start: cellIdx } });
+          this.props.propagateState({
+            rangeSelect: { start: cellIdx },
+            columnRange: null,
+          });
         }
       }
       return;

@@ -23,7 +23,8 @@ function buildCellClassName(props) {
   let className = "cell";
   className += allowCellEdits ? " editable" : "";
   const rangeSelect = _.get(gridState, "rangeSelect");
-  className += isInRange(columnIndex, rowIndex, rangeSelect) ? " in-range" : "";
+  const columnRange = _.get(gridState, "columnRange");
+  className += isInRange(columnIndex, rowIndex, rangeSelect, columnRange) ? " in-range" : "";
   return className;
 }
 
@@ -58,11 +59,12 @@ class ReactGridCell extends React.Component {
     if (rowIndex == 0) {
       return (
         <Header
-          {...gridState}
+          gridState={gridState}
           key={key}
           columnIndex={columnIndex}
           style={style}
           propagateState={this.props.propagateState}
+          openChart={this.props.openChart}
         />
       );
     }
@@ -118,12 +120,14 @@ ReactGridCell.propTypes = {
     backgroundMode: PropTypes.string,
     rangeHighlight: PropTypes.object,
     rangeSelect: PropTypes.object,
+    columnRange: PropTypes.object,
   }),
   propagateState: PropTypes.func,
   dataId: PropTypes.string,
   editedCell: PropTypes.string,
   allowCellEdits: PropTypes.bool,
   filteredRanges: PropTypes.object,
+  openChart: PropTypes.func,
 };
 const ReduxGridCell = connect(
   state => ({

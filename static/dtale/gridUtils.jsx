@@ -230,6 +230,7 @@ EXPORTS.buildState = props => ({
   backgroundMode: null,
   rangeHighlight: {},
   rangeSelect: null,
+  columnRange: null,
 });
 
 EXPORTS.noHidden = columns => !_.some(columns, { visible: false });
